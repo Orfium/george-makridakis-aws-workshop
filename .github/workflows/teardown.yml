@@ -1,0 +1,36 @@
+name: Todo Teardown Example
+
+on:
+  pull_request:
+    branches:
+      - "master"
+    types: [closed]
+
+jobs:
+  set-deployment-env:
+    name: Set Deployment Environment Variables
+    runs-on: ubuntu-latest
+    outputs:
+      env-id: ${{ steps.set-deployment-environment.outputs.ENVIRONMENT_ID }}
+      env-suffix: ${{ steps.set-deployment-environment.outputs.ENVIRONMENT_SUFFIX }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Deployment Environment
+        id: set-deployment-environment
+        run: |
+          echo ${{ github.event_name }}
+          echo "This is a review environment"
+          cat infra/environments/review.env >> $GITHUB_ENV
+          echo "ENVIRONMENT_ID=review" >> $GITHUB_OUTPUT
+          echo "ENVIRONMENT_SUFFIX=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+
+  teardown:
+    needs:
+      - set-deployment-env
+    uses: Orfium/orfium-github-actions/.github/workflows/teardown.yml@master
+    with:
+      environment_id:  ${{ needs.set-deployment-env.outputs.env-id }}
+      environment_suffix: ${{ needs.set-deployment-env.outputs.env-suffix }}
