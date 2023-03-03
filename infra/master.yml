@@ -1,6 +1,12 @@
 Parameters:
   ProductName:
     Type: String
+  HostedZoneId:
+    Type: String
+  HostedZoneName:
+    Type: String
+  Subdomain:
+    Type: String
 
 Resources:
   Network:
@@ -9,3 +15,15 @@ Resources:
       TemplateURL: !Sub https://orfium-cf-templates-repository-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/vpc-v1.0.yml
       Parameters:
         ProductName: !Ref ProductName
+
+  Cluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://orfium-cf-templates-repository-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/ecs-cluster-v1.0.yml
+      Parameters:
+        ClusterName: !Ref AWS::StackName
+        HostedZoneId: !Ref HostedZoneId
+        HostedZoneName: !Ref HostedZoneName
+        PublicSubnetIds: !GetAtt Network.Outputs.PublicSubnets
+        Subdomain: !Ref Subdomain
+        VpcId: !GetAtt Network.Outputs.VPC
