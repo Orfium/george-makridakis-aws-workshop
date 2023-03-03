@@ -37,7 +37,7 @@ Resources:
       Parameters:
         ClusterId: !GetAtt Cluster.Outputs.ClusterId
         ClusterSecurityGroupId: !GetAtt Cluster.Outputs.ClusterSecurityGroupId
-        #Command: "gunicorn todo.wsgi --bind 0.0.0.0:8000"
+        Command: "uvicorn app.main:app --host 0.0.0.0 --port 5000" # "gunicorn todo.wsgi --bind 0.0.0.0:8000"
         ContainerImage: !Ref ImageUri
         ClusterDnsNamespaceId: !GetAtt Cluster.Outputs.ClusterDnsNamespaceId
         DesiredCount: "1"
