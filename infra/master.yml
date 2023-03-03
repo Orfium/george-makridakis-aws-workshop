@@ -1,0 +1,11 @@
+Parameters:
+  ProductName:
+    Type: String
+
+Resources:
+  Network:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://orfium-cf-templates-repository-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/vpc-v1.0.yml
+      Parameters:
+        ProductName: !Ref ProductName

@@ -1,0 +1,11 @@
+version=0.1
+
+[review]
+[review.deploy]
+[review.deploy.parameters]
+s3_bucket="aws-sam-cli-managed-default-samclisourcebucket-d4fezbak9g6h"
+s3_prefix="todo-example"
+region="us-east-1"
+confirm_changeset=false
+capabilities="CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND"
+tags="info:creator=aris.loutsis info:maintainer=aris.loutsis info:product=aws-workshop info:env=dev"
