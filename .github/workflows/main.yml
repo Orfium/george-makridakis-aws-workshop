@@ -1,0 +1,28 @@
+name: aws-workshop-george-makridakis
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - "*"
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: "Deploy with SAM (aws-workshop-george-makridakis)"
+    uses: Orfium/orfium-github-actions/.github/workflows/deploy.yml@master
+    with:
+      #python_version: '3.10'
+      environment_id:  review # ${{ needs.build.outputs.env-id }}
+      environment_suffix: ${{ github.event.pull_request.number }} #${{ needs.build.outputs.env-suffix }}
+      main_cf_template: infra/master.yml
+      #dynamic_cf_parameters: '{\"ImageUri\":\"${{ needs.build.outputs.ecr-image }}\", \"InitialDeployment\":\"${{ needs.build.outputs.init-deployment }}\"}'
