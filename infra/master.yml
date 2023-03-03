@@ -41,7 +41,7 @@ Resources:
         ContainerImage: !Ref ImageUri
         ClusterDnsNamespaceId: !GetAtt Cluster.Outputs.ClusterDnsNamespaceId
         DesiredCount: "1"
-        HealthCheckPath: "/items/"
+        HealthCheckPath: "/items"
         HostedZoneName: !Ref HostedZoneName
         HttpsListenerArn: !GetAtt Cluster.Outputs.HttpsListenerArn
         ListenerRulePriority: "1"
