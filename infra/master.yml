@@ -1,6 +1,14 @@
 Parameters:
   ProductName:
     Type: String
+  HostedZoneId:
+    Type: String
+  HostedZoneName:
+    Type: String
+  Subdomain:
+    Type: String
+  ImageUri:
+    Type: String
 
 Resources:
   Network:
@@ -9,3 +17,40 @@ Resources:
       TemplateURL: !Sub https://orfium-cf-templates-repository-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/vpc-v1.0.yml
       Parameters:
         ProductName: !Ref ProductName
+
+  Cluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://orfium-cf-templates-repository-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/ecs-cluster-v1.0.yml
+      Parameters:
+        ClusterName: !Ref AWS::StackName
+        HostedZoneId: !Ref HostedZoneId
+        HostedZoneName: !Ref HostedZoneName
+        PublicSubnetIds: !GetAtt Network.Outputs.PublicSubnets
+        Subdomain: !Ref Subdomain
+        VpcId: !GetAtt Network.Outputs.VPC
+
+  Api:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://orfium-cf-templates-repository-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/ecs-service-v1.0.yml
+      Parameters:
+        ClusterId: !GetAtt Cluster.Outputs.ClusterId
+        ClusterSecurityGroupId: !GetAtt Cluster.Outputs.ClusterSecurityGroupId
+        Command: "uvicorn app.main:app --host 0.0.0.0 --port 5000" # "gunicorn todo.wsgi --bind 0.0.0.0:8000"
+        ContainerImage: !Ref ImageUri
+        ClusterDnsNamespaceId: !GetAtt Cluster.Outputs.ClusterDnsNamespaceId
+        DesiredCount: "1"
+        HealthCheckPath: "/items"
+        HostedZoneName: !Ref HostedZoneName
+        HttpsListenerArn: !GetAtt Cluster.Outputs.HttpsListenerArn
+        ListenerRulePriority: "1"
+        LoadBalancerCanonicalHostedZoneId: !GetAtt Cluster.Outputs.LoadBalancerCanonicalHostedZoneId
+        LoadBalancerDnsName: !GetAtt Cluster.Outputs.LoadBalancerDnsName
+        LogGroupId: !GetAtt Cluster.Outputs.LogGroupId
+        SubnetIds: !GetAtt Network.Outputs.PublicSubnets
+        ServiceName: api
+        ServicePort: "5000"
+        Subdomain: !Ref Subdomain
+        VpcCidr: !GetAtt Network.Outputs.VPCCidrBlock
+        VpcId: !GetAtt Network.Outputs.VPC
